@@ -6,8 +6,6 @@ import re
 from room import Room
 from configs import *
 
-# width, height = 1200, 600
-# fps = 30
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
