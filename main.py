@@ -29,9 +29,6 @@ directions = {'up': True, 'down': False, 'left': False, 'right': False}
 
 while True:
     st = time()
-    x, y = LIDAR_RADIUS * np.cos(theta) + initial_position[0], LIDAR_RADIUS * np.sin(theta) + initial_position[1]
-    new_points_lidar = list(zip(x, y))
-    intersects = list()
 
     keys = pygame.key.get_pressed()
     new_position = deepcopy(initial_position)
@@ -57,6 +54,10 @@ while True:
             sprite = pygame.transform.rotate(initial_sprite, 270)
         directions = {'up': False, 'down': False, 'left': False, 'right': True}
 
+    x, y = LIDAR_RADIUS * np.cos(theta) + new_x, LIDAR_RADIUS * np.sin(theta) + new_y
+    new_points_lidar = list(zip(x, y))
+    intersects = list()
+
     min_dists = list()
     for p_i in range(len(new_points_lidar)):
         lidar_line = L.from_p(P(*new_points_lidar[p_i]), P(new_x, new_y))
@@ -70,13 +71,10 @@ while True:
                     min(c[i][0], c[i + 1][0]) <= intersection_global.x < max(c[i][0], c[i + 1][0]) and \
                         min(c[i][1], c[i + 1][1]) <= intersection_global.y < max(c[i][1], c[i + 1][1]):
                     degrees = np.rad2deg(theta[p_i])
-                    step = 0
-                    if initial_position != (new_x, new_y):
-                        step = STEP
-                    if (degrees <= 90 and intersection_global.x >= new_x - step and intersection_global.y >= new_y - step) or \
-                            (90 < degrees <= 180 and intersection_global.x <= new_x + step and intersection_global.y >= new_y - step) or \
-                            (180 < degrees <= 270 and intersection_global.x <= new_x + step and intersection_global.y <= new_y + step) or \
-                            (270 < degrees and intersection_global.x >= new_x - step and intersection_global.y <= new_y + step):
+                    if (degrees <= 90 and intersection_global.x >= new_x and intersection_global.y >= new_y) or \
+                            (90 < degrees <= 180 and intersection_global.x <= new_x and intersection_global.y >= new_y) or \
+                            (180 < degrees <= 270 and intersection_global.x <= new_x and intersection_global.y <= new_y) or \
+                            (270 < degrees and intersection_global.x >= new_x and intersection_global.y <= new_y):
                         intersection = intersection_global
                         min_dists.append(dist)
                         min_dist = dist
