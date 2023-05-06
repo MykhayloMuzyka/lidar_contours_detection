@@ -19,7 +19,7 @@ initial_position = room.initial_position
 theta = np.linspace(0, 2 * np.pi, int(360 / ANGLE_STEP))
 x, y = LIDAR_RADIUS * np.cos(theta) + initial_position[0], LIDAR_RADIUS * np.sin(theta) + initial_position[1]
 points_lidar = list(zip(x, y))
-screen.fill((255, 255, 255))
+screen.fill((0, 0, 0))
 pygame.image.save(screen, 'last_frame.png')
 imp = pygame.image.load('last_frame.png').convert()
 initial_sprite = pygame.image.load('sprites/lidar.png')
@@ -70,10 +70,13 @@ while True:
                     min(c[i][0], c[i + 1][0]) <= intersection_global.x < max(c[i][0], c[i + 1][0]) and \
                         min(c[i][1], c[i + 1][1]) <= intersection_global.y < max(c[i][1], c[i + 1][1]):
                     degrees = np.rad2deg(theta[p_i])
-                    if (degrees <= 90 and intersection_global.x >= new_x and intersection_global.y >= new_y) or \
-                            (90 <= degrees <= 180 and intersection_global.x <= new_x and intersection_global.y >= new_y) or \
-                            (180 <= degrees <= 270 and intersection_global.x <= new_x and intersection_global.y <= new_y) or \
-                            (270 <= degrees and intersection_global.x >= new_x and intersection_global.y <= new_y):
+                    step = 0
+                    if initial_position != (new_x, new_y):
+                        step = STEP
+                    if (degrees <= 90 and intersection_global.x >= new_x - step and intersection_global.y >= new_y - step) or \
+                            (90 < degrees <= 180 and intersection_global.x <= new_x + step and intersection_global.y >= new_y - step) or \
+                            (180 < degrees <= 270 and intersection_global.x <= new_x + step and intersection_global.y <= new_y + step) or \
+                            (270 < degrees and intersection_global.x >= new_x - step and intersection_global.y <= new_y + step):
                         intersection = intersection_global
                         min_dists.append(dist)
                         min_dist = dist
@@ -83,19 +86,18 @@ while True:
 
     if not min_dists or (min_dists and min(min_dists) >= ROBOT_SIZE):
         if initial_position != (new_x, new_y):
-            points_lidar = new_points_lidar
             imp = cv2.imread('last_frame.png')
             for c in intersects:
-                cv2.circle(imp, (round(c.x), round(c.y)), radius=1, color=(0, 0, 0), thickness=1)
+                cv2.circle(imp, (round(c.x), round(c.y)), radius=1, color=(255, 255, 255), thickness=1)
             cv2.imwrite('last_frame.png', imp)
             imp = pygame.image.load('last_frame.png').convert()
-        initial_position = (new_x, new_y)
+            initial_position = (new_x, new_y)
+        points_lidar = new_points_lidar
 
     screen.blit(imp, (0, 0))
 
     pygame.gfxdraw.filled_polygon(screen, points_lidar, (255, 255, 0, 123))
     screen.blit(sprite, (initial_position[0] - ROBOT_SIZE, initial_position[1] - ROBOT_SIZE))
-    pygame.gfxdraw.polygon(screen, contours[1], (255, 255, 255))
 
     pygame.display.flip()
     clock.tick(FPS)
