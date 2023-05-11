@@ -4,6 +4,7 @@ import os
 from time import time
 from geometry import *
 import cv2
+import matplotlib.pyplot as plt
 from configs import *
 from copy import copy, deepcopy
 
@@ -26,6 +27,7 @@ initial_sprite = pygame.image.load('sprites/lidar.png')
 initial_sprite = pygame.transform.scale(initial_sprite, (ROBOT_SIZE * 2, ROBOT_SIZE * 2))
 sprite = copy(initial_sprite)
 directions = {'up': True, 'down': False, 'left': False, 'right': False}
+frames = list()
 
 while True:
     st = time()
@@ -102,6 +104,11 @@ while True:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            if SHOW_FRAMES_DURATION:
+                plt.plot(frames)
+                plt.plot([0, len(frames)], [1 / FPS, 1 / FPS])
+                plt.show()
             exit()
 
-    print(time() - st)
+    if SHOW_FRAMES_DURATION:
+        frames.append(time() - st)
